@@ -1,0 +1,10 @@
+# Ignore everything
+/*
+/*/
+
+# Inverse ignore some Unity stuff
+!/Assets/
+!/ProjectSettings/
+!/Packages/
+!.gitignore
+!.gitattributes

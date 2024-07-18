@@ -1,0 +1,22 @@
+{
+    "name": "TimboJimbo.DeepLinkManager",
+    "rootNamespace": "TimboJimbo.DeepLinkManager",
+    "references": [
+        "GUID:2a37df438292d4903b4e5159c5de3bf9"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "appsflyer-unity-plugin",
+            "expression": "",
+            "define": "APPSFLYER_AVAILABLE"
+        }
+    ],
+    "noEngineReferences": false
+}
