@@ -15,7 +15,7 @@ namespace TimboJimbo.DeepLinkManager
         
         internal static readonly Dictionary<string, Type> Parsers = new();
         internal static readonly List<string> Hosts = new();
-        internal static readonly List<string> CustomSchemas = new();
+        internal static readonly List<string> CustomSchemes = new();
      
         private static NamedLogger _logger = new NamedLogger(nameof(DeepLinkManager));
         private static List<IDeepLinkHandler> _activeHandlers = new();
@@ -55,11 +55,11 @@ namespace TimboJimbo.DeepLinkManager
                     }
                 }
                 
-                var customSchemaAttributes = assembly.GetCustomAttributes(typeof(DeepLinkCustomSchemaAttribute), true).Cast<DeepLinkCustomSchemaAttribute>().ToList();
-                foreach (var customSchemaAttribute in customSchemaAttributes)
+                var customSchemeAttributes = assembly.GetCustomAttributes(typeof(DeepLinkCustomSchemeAttribute), true).Cast<DeepLinkCustomSchemeAttribute>().ToList();
+                foreach (var customSchemeAttribute in customSchemeAttributes)
                 {
-                    if (CustomSchemas.Contains(customSchemaAttribute.Schema)) continue;
-                    CustomSchemas.Add(customSchemaAttribute.Schema);
+                    if (CustomSchemes.Contains(customSchemeAttribute.Scheme)) continue;
+                    CustomSchemes.Add(customSchemeAttribute.Scheme);
                 }
                 
                 var deepLinkHostAttributes = assembly.GetCustomAttributes(typeof(DeepLinkHostAttribute), true).Cast<DeepLinkHostAttribute>().ToList();
@@ -73,8 +73,8 @@ namespace TimboJimbo.DeepLinkManager
             foreach (var host in Hosts)
                 _logger.LogRuntimeOnly($"Registered Deep Link Host: {host}");
             
-            foreach (var schema in CustomSchemas)
-                _logger.LogRuntimeOnly($"Registered Deep Link Custom Schema: {schema}");
+            foreach (var scheme in CustomSchemes)
+                _logger.LogRuntimeOnly($"Registered Deep Link Custom Scheme: {scheme}");
             
             foreach (var (match, dataType) in Parsers)
                 _logger.LogRuntimeOnly($"Registered Deep Link Parser: {match} -> {dataType}");
@@ -103,9 +103,9 @@ namespace TimboJimbo.DeepLinkManager
         
         public static bool IsDeepLinkUrl(string url)
         {
-            foreach (var customSchema in CustomSchemas)
+            foreach (var customScheme in CustomSchemes)
             {
-                if(url.StartsWith(customSchema))
+                if(url.StartsWith(customScheme))
                     return true;
             }
             

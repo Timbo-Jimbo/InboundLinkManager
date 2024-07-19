@@ -3,8 +3,8 @@ using TimboJimbo.DeepLinkManager;
 using TimboJimbo.DeepLinkManager.Handlers;
 using UnityEngine;
 
-// Register a custom schema!
-[assembly: DeepLinkCustomSchema("log-example")]
+// Register a custom scheme!
+[assembly: DeepLinkCustomScheme("log-example")]
 
 // This is how you would register a host
 // [assembly: DeepLinkHost("www.example.com")] 

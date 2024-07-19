@@ -80,7 +80,7 @@ namespace TimboJimbo.DeepLinkManager.Editor.Android
                 }
 
                 //handle all links for custom schemas for this app 
-                if (DeepLinkManager.CustomSchemas.Any())
+                if (DeepLinkManager.CustomSchemes.Any())
                 {
                     // (we want *all* 'your-schema://' links to be handled by the app...
                     // ...so we don't need to pass in a list of hosts + prefixes to filter for)
@@ -90,7 +90,7 @@ namespace TimboJimbo.DeepLinkManager.Editor.Android
                     // your-schema://*
                     AddIntentFilterForIncomingLinks(
                         "Deep Links",
-                        DeepLinkManager.CustomSchemas.ToArray(), 
+                        DeepLinkManager.CustomSchemes.ToArray(), 
                         Array.Empty<(string, string)>()
                     );
                 }
