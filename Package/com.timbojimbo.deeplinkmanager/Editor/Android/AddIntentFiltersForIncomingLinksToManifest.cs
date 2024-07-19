@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Xml;
+using UnityEngine;
 
 #if UNITY_ANDROID
 using UnityEditor.Android;
@@ -71,6 +72,7 @@ namespace TimboJimbo.DeepLinkManager.Editor.Android
                     // https://stg.example.com/path2, https://dev.example.com/path1, https://dev.example.com/path2
                     
                     AddIntentFilterForIncomingLinks(
+                        "App Links",
                         new[]
                         {
                             Uri.UriSchemeHttp,
@@ -90,6 +92,7 @@ namespace TimboJimbo.DeepLinkManager.Editor.Android
                     // resulting intent filters will handle:
                     // your-schema://*
                     AddIntentFilterForIncomingLinks(
+                        "Deep Links",
                         DeepLinkManager.CustomSchemas.ToArray(), 
                         Array.Empty<(string, string)>()
                     );
@@ -102,7 +105,7 @@ namespace TimboJimbo.DeepLinkManager.Editor.Android
                     return attr;
                 }
                 
-                void AddIntentFilterForIncomingLinks(string[] schemas, (string host, string pathPrefix)[] hostPrefixCombos) 
+                void AddIntentFilterForIncomingLinks(string sectionName, string[] schemas, (string host, string pathPrefix)[] hostPrefixCombos) 
                 {
                     var intentFilter = doc.CreateElement("intent-filter");
                     intentFilter.Attributes.Append(CreateAndroidAttribute("autoVerify", "true"));
@@ -139,8 +142,10 @@ namespace TimboJimbo.DeepLinkManager.Editor.Android
                     }
                     
                     mainActivity.AppendChild(intentFilter);
+                    mainActivity.InsertBefore(doc.CreateComment($" {nameof(DeepLinkManager)} inject {sectionName} "), intentFilter);
                 }
             }
+            
             doc.Save(manifestPath);
         }
     }

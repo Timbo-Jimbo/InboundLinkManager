@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,7 +9,7 @@ namespace TimboJimbo.DeepLinkManager.Editor
     [FilePath("ProjectSettings/TJ.DeepLinkManagerSettings.asset", FilePathAttribute.Location.ProjectFolder)]
     internal class DeepLinkManagerSettings : ScriptableSingleton<DeepLinkManagerSettings>
     {
-        [SerializeField] internal  List<CustomSchemaMetadata> CustomSchemaMetadatas = new List<CustomSchemaMetadata>();
+        [SerializeField] internal  List<CustomSchemaMetadata> CustomSchemaMetadatas = new();
 
         [InitializeOnLoadMethod]
         static void Init()
