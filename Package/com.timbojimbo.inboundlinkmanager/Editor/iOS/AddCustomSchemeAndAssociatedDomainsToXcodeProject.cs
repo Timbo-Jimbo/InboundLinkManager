@@ -1,16 +1,15 @@
 #if UNITY_IOS
-
 using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.iOS.Xcode;
 
-namespace TimboJimbo.DeepLinkManager.Editor.iOS
+namespace TimboJimbo.InboundLinkManager.Editor.iOS
 {
-    internal class AddSchemaAndAppLinksToXcodeProject
+    internal class AddCustomSchemeAndAssociatedDomainsToXcodeProject
     {
-        private static readonly NamedLogger _logger = new ("DeepLinkManager[XCode Project Patcher]");
+        private static readonly NamedLogger _logger = new ($"{nameof(InboundLinkManager)}[XCode Project Patcher]");
 
         [PostProcessBuild]
         public static void OnPostprocessBuild(BuildTarget buildTarget, string pathToBuiltProject)
@@ -23,7 +22,7 @@ namespace TimboJimbo.DeepLinkManager.Editor.iOS
                 
                 string targetGuid = pbxProject.GetUnityMainTargetGuid();
 
-                var appLinks = DeepLinkManager.Hosts
+                var appLinks = InboundLinkManager.AssociatedDomains
                     .Select(x => $"applinks:{x}")
                     .ToList();
 
@@ -64,11 +63,11 @@ namespace TimboJimbo.DeepLinkManager.Editor.iOS
                     }
                 }
                 
-                var schemas = DeepLinkManager.CustomSchemas
+                var schemes = InboundLinkManager.CustomSchemes
                     .Select(x => x + "://")
                     .ToList();
 
-                if (schemas.Any())
+                if (schemes.Any())
                 {
                     // Load the Info.plist file
                     string plistPath = Path.Combine(pathToBuiltProject, "Info.plist");
@@ -98,12 +97,12 @@ namespace TimboJimbo.DeepLinkManager.Editor.iOS
                     if (mainEntrySchemesArray == null)
                         mainEntrySchemesArray = mainEntry.CreateArray("CFBundleURLSchemes");
 
-                    // Add missing schemas
-                    var alreadyDefinedSchemas = mainEntrySchemesArray.values.Select(x => x.AsString()).ToList();
-                    foreach (var schema in schemas.Except(alreadyDefinedSchemas))
+                    // Add missing schemes
+                    var alreadyDefinedSchemes = mainEntrySchemesArray.values.Select(x => x.AsString()).ToList();
+                    foreach (var scheme in schemes.Except(alreadyDefinedSchemes))
                     {
-                        _logger.Log($"Adding URL Scheme: {schema}");
-                        mainEntrySchemesArray.AddString(schema);
+                        _logger.Log($"Adding URL Scheme: {scheme}");
+                        mainEntrySchemesArray.AddString(scheme);
                     }
 
                     // Write the changes back to the Info.plist file

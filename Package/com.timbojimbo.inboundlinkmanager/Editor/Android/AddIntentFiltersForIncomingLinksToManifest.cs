@@ -4,13 +4,13 @@ using System.Linq;
 using System.Xml;
 using UnityEditor.Android;
 
-namespace TimboJimbo.DeepLinkManager.Editor.Android
+namespace TimboJimbo.InboundLinkManager.Editor.Android
 {
     internal class AddIntentFiltersForIncomingLinksToManifest : IPostGenerateGradleAndroidProject
     {
         public int callbackOrder { get; }
         
-        private readonly NamedLogger _logger = new ("DeepLinkManager[Manifest Patcher]");
+        private readonly NamedLogger _logger = new ($"{nameof(InboundLinkManager)}[Manifest Patcher]");
         
         public void OnPostGenerateGradleAndroidProject(string path)
         {
@@ -29,33 +29,36 @@ namespace TimboJimbo.DeepLinkManager.Editor.Android
                 
                 if(mainActivity == null)
                 {
-                    _logger.Error("Unable to add intent filters to AndroidManifest.xml for DeepLinks - No activity with the MAIN intent filter was found.");
+                    _logger.Error("Unable to add intent filters to AndroidManifest.xml for App Links/Deep Links - No activity with the MAIN intent filter was found.");
                     return;
                 }
                 
                 //add the intent filters
-                var deepLinkPathPrefixes = DeepLinkManager.Parsers
+                var inboundLinkPrefixes = InboundLinkManager.Parsers
                     .Select(x => x.Key.TrimEnd('/'))
                     .Distinct()
                     .ToArray();
-            
-                var invalidDeepLinks = deepLinkPathPrefixes
-                    .Where(x => !x.StartsWith('/'))
-                    .ToArray();
 
-                if (invalidDeepLinks.Any())
                 {
-                    var invalidDeepLinksString = string.Join(", ", invalidDeepLinks);
-                    throw new Exception($"Detected one or more invalid Deep Links ({invalidDeepLinksString}). All Deep Links must start with a '/'. Please fix the 'path' in your DeepLinkTypeAttribute(s).");
+                    var invalidPrefixes = inboundLinkPrefixes
+                        .Where(x => !x.StartsWith('/'))
+                        .ToArray();
+
+                    if (invalidPrefixes.Any())
+                    {
+                        var invalidPrefixList = string.Join(", ", invalidPrefixes);
+                        throw new Exception($"Detected invalid inbound link prefixes ({invalidPrefixList}). Ensure all 'InboundLinkParser' path's start with a '/'. Please fix the 'path' in your InboundLinkParserAttribute(s).");
+                    }
                 }
 
-                var deepLinkHosts = DeepLinkManager.Hosts;
+                var associatedDomains = InboundLinkManager.AssociatedDomains;
         
-                var allHostPrefixCombos = deepLinkHosts
-                    .SelectMany(host => deepLinkPathPrefixes.Select(prefix => (host, prefix)))
+                var allHostPrefixCombos = associatedDomains
+                    .SelectMany(host => inboundLinkPrefixes.Select(prefix => (host, prefix)))
                     .ToArray();
         
                 //handle only links with specific host and path prefixes for http/https
+                //aka 'app links' on android
                 if (allHostPrefixCombos.Any())
                 {
                     // (we don't want to attempt to handle *every* http/https link...
@@ -79,18 +82,19 @@ namespace TimboJimbo.DeepLinkManager.Editor.Android
                     );
                 }
 
-                //handle all links for custom schemas for this app 
-                if (DeepLinkManager.CustomSchemes.Any())
+                //handle all links for custom schemes for this app 
+                //aka 'deep links' on android
+                if (InboundLinkManager.CustomSchemes.Any())
                 {
-                    // (we want *all* 'your-schema://' links to be handled by the app...
+                    // (we want *all* 'your-scheme://' links to be handled by the app...
                     // ...so we don't need to pass in a list of hosts + prefixes to filter for)
                     // ie for the following:
-                    // schemas: ["your-schema"]
+                    // schemes: ["your-scheme"]
                     // resulting intent filters will handle:
-                    // your-schema://*
+                    // your-scheme://*
                     AddIntentFilterForIncomingLinks(
                         "Deep Links",
-                        DeepLinkManager.CustomSchemes.ToArray(), 
+                        InboundLinkManager.CustomSchemes.ToArray(), 
                         Array.Empty<(string, string)>()
                     );
                 }
@@ -102,7 +106,7 @@ namespace TimboJimbo.DeepLinkManager.Editor.Android
                     return attr;
                 }
                 
-                void AddIntentFilterForIncomingLinks(string sectionName, string[] schemas, (string host, string pathPrefix)[] hostPrefixCombos) 
+                void AddIntentFilterForIncomingLinks(string sectionName, string[] schemes, (string host, string pathPrefix)[] hostPrefixCombos) 
                 {
                     var intentFilter = doc.CreateElement("intent-filter");
                     intentFilter.Attributes.Append(CreateAndroidAttribute("autoVerify", "true"));
@@ -119,13 +123,13 @@ namespace TimboJimbo.DeepLinkManager.Editor.Android
                     defaultCategory.Attributes.Append(CreateAndroidAttribute("name", "android.intent.category.DEFAULT"));
                     intentFilter.AppendChild(defaultCategory);
                     
-                    foreach (var schema in schemas)
+                    foreach (var scheme in schemes)
                     {
                         var data = doc.CreateElement("data");
-                        data.Attributes.Append(CreateAndroidAttribute("scheme", schema));
+                        data.Attributes.Append(CreateAndroidAttribute("scheme", scheme));
                         intentFilter.AppendChild(data);
                         
-                        _logger.Log($"Added intent filter for incoming links with schema '{schema}'");
+                        _logger.Log($"Added intent filter for incoming links with scheme '{scheme}'");
                     }
 
                     foreach (var (host, pathPrefix) in hostPrefixCombos)
@@ -139,7 +143,7 @@ namespace TimboJimbo.DeepLinkManager.Editor.Android
                     }
                     
                     mainActivity.AppendChild(intentFilter);
-                    mainActivity.InsertBefore(doc.CreateComment($" {nameof(DeepLinkManager)} inject {sectionName} "), intentFilter);
+                    mainActivity.InsertBefore(doc.CreateComment($" {nameof(InboundLinkManager)} inject {sectionName} "), intentFilter);
                 }
             }
             

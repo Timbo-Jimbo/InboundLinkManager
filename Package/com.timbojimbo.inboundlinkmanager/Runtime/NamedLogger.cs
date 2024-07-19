@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace TimboJimbo.DeepLinkManager
+namespace TimboJimbo.InboundLinkManager
 {
     internal class NamedLogger
     {

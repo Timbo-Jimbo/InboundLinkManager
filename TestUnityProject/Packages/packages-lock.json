@@ -7,8 +7,8 @@
       "dependencies": {},
       "hash": "02b3db3ad7bdac8f683a20bf1668a29b8038019f"
     },
-    "com.timbojimbo.deeplinkmanager": {
-      "version": "file:../../Package/com.timbojimbo.deeplinkmanager",
+    "com.timbojimbo.inboundlinkmanager": {
+      "version": "file:../../Package/com.timbojimbo.inboundlinkmanager",
       "depth": 0,
       "source": "local",
       "dependencies": {}

@@ -1,4 +1,4 @@
-namespace TimboJimbo.DeepLinkManager.Handlers
+namespace TimboJimbo.InboundLinkManager.Handlers
 {
     public enum Result
     {

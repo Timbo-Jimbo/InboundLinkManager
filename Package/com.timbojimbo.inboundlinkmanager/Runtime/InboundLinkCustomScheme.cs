@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace TimboJimbo.DeepLinkManager
+namespace TimboJimbo.InboundLinkManager
 {
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-    public class DeepLinkCustomSchemeAttribute : Attribute
+    public class InboundLinkCustomScheme : Attribute
     {
         public readonly string Scheme;
 
-        public DeepLinkCustomSchemeAttribute(string scheme)
+        public InboundLinkCustomScheme(string scheme)
         {
             Scheme = scheme;
         }

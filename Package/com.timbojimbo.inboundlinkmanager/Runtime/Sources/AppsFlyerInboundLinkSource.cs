@@ -5,12 +5,12 @@ using System.Linq;
 using AppsFlyerSDK;
 using UnityEngine;
 
-namespace TimboJimbo.DeepLinkManager.Sources
+namespace TimboJimbo.InboundLinkManager.Sources
 {
-    public class AppsFlyerDeepLinkSource : IDeepLinkSource
+    public class AppsFlyerInboundLinkSource : IInboundLinkSource
     {
-        public event Action<string> OnDeepLinkActivated;
-        private NamedLogger _logger = new (nameof(AppsFlyerDeepLinkSource));
+        public event Action<string> OnInboundLinkReceived;
+        private NamedLogger _logger = new (nameof(AppsFlyerInboundLinkSource));
         
         public void Activate()
         {
@@ -25,7 +25,7 @@ namespace TimboJimbo.DeepLinkManager.Sources
             //(otherwise, we'd be doubling up on them...!)
             if(AppsFlyer.instance == null || AppsFlyer.isSDKStopped())
             {
-                OnDeepLinkActivated?.Invoke(obj);
+                OnInboundLinkReceived?.Invoke(obj);
             }
         }
 
@@ -59,7 +59,7 @@ namespace TimboJimbo.DeepLinkManager.Sources
             var linkField = possibleLinkFields.OrderBy(v => v.path.Length).FirstOrDefault();
             _logger.Log("Entry chosen to be treated as deep link: " + linkField.path);
             
-            OnDeepLinkActivated?.Invoke(linkField.value);
+            OnInboundLinkReceived?.Invoke(linkField.value);
 
             void ExtractFields(string path, Dictionary<string, object> dic, List<(string path, string value)> output)
             {

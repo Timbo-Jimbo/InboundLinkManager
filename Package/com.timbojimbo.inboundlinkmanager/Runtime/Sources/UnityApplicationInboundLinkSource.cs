@@ -1,11 +1,11 @@
 using System;
 using UnityEngine;
 
-namespace TimboJimbo.DeepLinkManager.Sources
+namespace TimboJimbo.InboundLinkManager.Sources
 {
-    public class UnityApplicationDeepLinkSource : IDeepLinkSource
+    public class UnityApplicationInboundLinkSource : IInboundLinkSource
     {
-        public event Action<string> OnDeepLinkActivated;
+        public event Action<string> OnInboundLinkReceived;
         
         public void Activate()
         {
@@ -15,7 +15,7 @@ namespace TimboJimbo.DeepLinkManager.Sources
 
         private void UnityAppDeepLinkActivated(string obj)
         {
-            OnDeepLinkActivated?.Invoke(obj);
+            OnInboundLinkReceived?.Invoke(obj);
         }
 
         public void Deactivate()

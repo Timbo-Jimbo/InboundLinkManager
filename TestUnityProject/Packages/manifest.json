@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "appsflyer-unity-plugin": "https://github.com/AppsFlyerSDK/appsflyer-unity-plugin.git#upm",
-    "com.timbojimbo.deeplinkmanager": "file:../../Package/com.timbojimbo.deeplinkmanager",
+    "com.timbojimbo.inboundlinkmanager": "file:../../Package/com.timbojimbo.inboundlinkmanager",
     "com.unity.collab-proxy": "2.0.5",
     "com.unity.feature.development": "1.0.1",
     "com.unity.ide.rider": "3.0.31",

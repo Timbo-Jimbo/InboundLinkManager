@@ -1,6 +1,6 @@
 {
-    "name": "TimboJimbo.DeepLinkManager.Editor",
-    "rootNamespace": "TimboJimbo.DeepLinkManager.Editor",
+    "name": "TimboJimbo.InboundLinkManager.Editor",
+    "rootNamespace": "TimboJimbo.InboundLinkManager.Editor",
     "references": [
         "GUID:c8fd53dedefadb143818864190be9dc1"
     ],
