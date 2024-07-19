@@ -1,1 +1,2 @@
-# DeepLinkManager
+# Inbound Link Manager
+Let's you define your associated domains, schemes and paths. Uses these definitions to add 'Universal Link' and 'Deep Link' support to your XCode project, and 'App Link' and 'Deep Link' support to your Android Manifest. Catches inbound links to your app and routes them to your parsers. Integrate with AppsFlyer (Optional/Auto-detected). Does only what it needs to do and tries to stay out of your way.
