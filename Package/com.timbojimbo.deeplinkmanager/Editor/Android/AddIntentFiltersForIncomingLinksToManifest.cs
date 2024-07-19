@@ -1,11 +1,8 @@
+#if UNITY_ANDROID
 using System;
 using System.Linq;
 using System.Xml;
-using UnityEngine;
-
-#if UNITY_ANDROID
 using UnityEditor.Android;
-#endif
 
 namespace TimboJimbo.DeepLinkManager.Editor.Android
 {
@@ -149,16 +146,5 @@ namespace TimboJimbo.DeepLinkManager.Editor.Android
             doc.Save(manifestPath);
         }
     }
-    
-#if !UNITY_ANDROID
-    
-    // This is a dummy interface to allow the code to compile in the editor
-    // (just makes it easier to work with when you're not building for Android)
-    internal interface IPostGenerateGradleAndroidProject
-    {
-        void OnPostGenerateGradleAndroidProject(string path);
-    }
-    
-#endif
-
 }
+#endif
