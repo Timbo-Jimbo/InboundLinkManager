@@ -293,7 +293,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1729296922}
         m_TargetAssemblyTypeName: Testing, Assembly-CSharp
-        m_MethodName: InjectLogDeepLink
+        m_MethodName: InjectInboundLink
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
