@@ -55,9 +55,12 @@ namespace TimboJimbo.DeepLinkManager
                     }
                 }
                 
-                var customSchemaAttribute = assembly.GetCustomAttributes(typeof(DeepLinkCustomSchemaAttribute), true).Cast<DeepLinkCustomSchemaAttribute>().FirstOrDefault();
-                if (customSchemaAttribute != null && !CustomSchemas.Contains(customSchemaAttribute.Schema))
+                var customSchemaAttributes = assembly.GetCustomAttributes(typeof(DeepLinkCustomSchemaAttribute), true).Cast<DeepLinkCustomSchemaAttribute>().ToList();
+                foreach (var customSchemaAttribute in customSchemaAttributes)
+                {
+                    if (CustomSchemas.Contains(customSchemaAttribute.Schema)) continue;
                     CustomSchemas.Add(customSchemaAttribute.Schema);
+                }
                 
                 var deepLinkHostAttributes = assembly.GetCustomAttributes(typeof(DeepLinkHostAttribute), true).Cast<DeepLinkHostAttribute>().ToList();
                 foreach (var entry in deepLinkHostAttributes)

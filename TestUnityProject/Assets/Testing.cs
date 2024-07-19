@@ -28,9 +28,10 @@ public class Testing : MonoBehaviour, IDeepLinkHandler
         DeepLinkManager.AddHandler(this, true);
     }
 
+    // Called via UI Button onClick
     public void InjectLogDeepLink(string text)
     {
-        //it is not neccecary to create a Uri object as TryRaiseDeepLinkEvent accepts a string
+        //it is not necessary to create a Uri object as TryRaiseDeepLinkEvent accepts a string
         //but this is just to emulate a real world scenario...!
         //The URL (And by extension the deep link data will be URL Encoded...:
         // 'log-example://log/Hello World' -> 'log-example://log/Hello%20World' 

@@ -8,21 +8,26 @@ using UnityEditor.Android;
 
 namespace TimboJimbo.DeepLinkManager.Editor.Android
 {
-    public class AddIntentFiltersForIncomingLinksToManifest : IPostGenerateGradleAndroidProject
+    internal class AddIntentFiltersForIncomingLinksToManifest : IPostGenerateGradleAndroidProject
     {
         public int callbackOrder { get; }
-        private NamedLogger _logger = new NamedLogger("DeepLinkManager[Manifest Patcher]");
+        
+        private readonly NamedLogger _logger = new ("DeepLinkManager[Manifest Patcher]");
         
         public void OnPostGenerateGradleAndroidProject(string path)
         {
-            const string AndroidXmlNamespace = "http://schemas.android.com/apk/res/android";
+            const string androidPrefix = "android";
+            const string androidXmlNamespace = "http://schemas.android.com/apk/res/android";
             
-            string manifestPath = path + "/src/main/AndroidManifest.xml";
-            var doc = new System.Xml.XmlDocument();
+            var manifestPath = path + "/src/main/AndroidManifest.xml";
+
+            var doc = new XmlDocument();
             doc.Load(manifestPath);
             {
                 //find activity with the launch intent
-                var mainActivity = doc.SelectSingleNode("/manifest/application/activity[intent-filter/action/@android:name='android.intent.action.MAIN']");
+                var nsMgr = new XmlNamespaceManager(new NameTable());
+                nsMgr.AddNamespace(androidPrefix, androidXmlNamespace);
+                var mainActivity = doc.SelectSingleNode("/manifest/application/activity[intent-filter/action/@android:name='android.intent.action.MAIN']", nsMgr);
                 
                 if(mainActivity == null)
                 {
@@ -79,7 +84,7 @@ namespace TimboJimbo.DeepLinkManager.Editor.Android
                 if (DeepLinkManager.CustomSchemas.Any())
                 {
                     // (we want *all* 'your-schema://' links to be handled by the app...
-                    // ...so we dont need to pass in a list of hosts + prefixes to filter for)
+                    // ...so we don't need to pass in a list of hosts + prefixes to filter for)
                     // ie for the following:
                     // schemas: ["your-schema"]
                     // resulting intent filters will handle:
@@ -92,7 +97,7 @@ namespace TimboJimbo.DeepLinkManager.Editor.Android
 
                 XmlAttribute CreateAndroidAttribute(string key, string value)
                 {
-                    XmlAttribute attr = doc.CreateAttribute("android", key, AndroidXmlNamespace);
+                    XmlAttribute attr = doc.CreateAttribute(androidPrefix, key, androidXmlNamespace);
                     attr.Value = value;
                     return attr;
                 }
@@ -100,24 +105,24 @@ namespace TimboJimbo.DeepLinkManager.Editor.Android
                 void AddIntentFilterForIncomingLinks(string[] schemas, (string host, string pathPrefix)[] hostPrefixCombos) 
                 {
                     var intentFilter = doc.CreateElement("intent-filter");
-                    intentFilter.Attributes?.Append(CreateAndroidAttribute("autoVerify", "true"));
+                    intentFilter.Attributes.Append(CreateAndroidAttribute("autoVerify", "true"));
                     
                     var action = doc.CreateElement("action");
-                    action.Attributes?.Append(CreateAndroidAttribute("name", "android.intent.action.VIEW"));
+                    action.Attributes.Append(CreateAndroidAttribute("name", "android.intent.action.VIEW"));
                     intentFilter.AppendChild(action);
 
                     var browsableCategory = doc.CreateElement("category");
-                    browsableCategory.Attributes?.Append(CreateAndroidAttribute("name", "android.intent.category.BROWSABLE"));
+                    browsableCategory.Attributes.Append(CreateAndroidAttribute("name", "android.intent.category.BROWSABLE"));
                     intentFilter.AppendChild(browsableCategory);
                     
                     var defaultCategory = doc.CreateElement("category");
-                    defaultCategory.Attributes?.Append(CreateAndroidAttribute("name", "android.intent.category.DEFAULT"));
+                    defaultCategory.Attributes.Append(CreateAndroidAttribute("name", "android.intent.category.DEFAULT"));
                     intentFilter.AppendChild(defaultCategory);
                     
                     foreach (var schema in schemas)
                     {
                         var data = doc.CreateElement("data");
-                        data.Attributes?.Append(CreateAndroidAttribute("scheme", schema));
+                        data.Attributes.Append(CreateAndroidAttribute("scheme", schema));
                         intentFilter.AppendChild(data);
                         
                         _logger.Log($"Added intent filter for incoming links with schema '{schema}'");
@@ -126,8 +131,8 @@ namespace TimboJimbo.DeepLinkManager.Editor.Android
                     foreach (var (host, pathPrefix) in hostPrefixCombos)
                     {
                         var data = doc.CreateElement("data");
-                        data.Attributes?.Append(CreateAndroidAttribute("host", host));
-                        data.Attributes?.Append(CreateAndroidAttribute("pathPrefix", pathPrefix));
+                        data.Attributes.Append(CreateAndroidAttribute("host", host));
+                        data.Attributes.Append(CreateAndroidAttribute("pathPrefix", pathPrefix));
                         intentFilter.AppendChild(data);
                         
                         _logger.Log($"Added intent filter for incoming links from host '{host}' with path prefix '{pathPrefix}'");
