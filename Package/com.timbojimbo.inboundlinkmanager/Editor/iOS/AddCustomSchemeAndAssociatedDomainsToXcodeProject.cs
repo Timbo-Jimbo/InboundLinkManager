@@ -35,11 +35,7 @@ namespace TimboJimbo.InboundLinkManager.Editor.iOS
                     {
                         // Ideally we would not have this hardcoded...! But PBXProject does not expose the target name...?
                         string targetName = "Unity-iPhone"; 
-                    
-                        //sanity check
-                        if(pbxProject.TargetGuidByName(targetName) != targetGuid)
-                            throw new System.Exception("Could not find the target name for the main target.");
-                    
+                        
                         entitlementsPath = $"{targetName}/{targetName}.entitlements";
                         pbxProject.AddFile(entitlementsPath, entitlementsPath);
                         pbxProject.SetBuildProperty(targetGuid, "CODE_SIGN_ENTITLEMENTS", entitlementsPath);
