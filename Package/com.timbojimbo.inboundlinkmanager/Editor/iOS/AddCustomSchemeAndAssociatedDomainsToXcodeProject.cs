@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.iOS.Xcode;
+using UnityEngine;
 
 namespace TimboJimbo.InboundLinkManager.Editor.iOS
 {
@@ -30,22 +31,15 @@ namespace TimboJimbo.InboundLinkManager.Editor.iOS
                 {
                     pbxProject.AddCapability(targetGuid, PBXCapabilityType.AssociatedDomains);
                 
-                    string entitlementsPath = pbxProject.GetBuildPropertyForAnyConfig(targetGuid, "CODE_SIGN_ENTITLEMENTS");
-                    if (string.IsNullOrEmpty(entitlementsPath))
-                    {
-                        // Ideally we would not have this hardcoded...! But PBXProject does not expose the target name...?
-                        string targetName = "Unity-iPhone"; 
-                        
-                        entitlementsPath = $"{targetName}/{targetName}.entitlements";
-                        pbxProject.AddFile(entitlementsPath, entitlementsPath);
-                        pbxProject.SetBuildProperty(targetGuid, "CODE_SIGN_ENTITLEMENTS", entitlementsPath);
-                    }
+                    // Ideally we would not have this hardcoded...! But PBXProject does not expose the target name...?
+                    string targetName = "Unity-iPhone"; 
+                    
+                    string entitlementsPath = $"{pathToBuiltProject}/{targetName}/{targetName}.entitlements";
+                    PlistDocument entitlements = new PlistDocument();
+                    if (File.Exists(entitlementsPath))
+                        entitlements.ReadFromFile(entitlementsPath);
                 
                     // Add Associated Domains to entitlements
-                    string entitlementsFullPath = Path.Combine(pathToBuiltProject, entitlementsPath);
-                    PlistDocument entitlements = new PlistDocument();
-                    entitlements.ReadFromFile(entitlementsFullPath);
-
                     PlistElementArray associatedDomains = entitlements.root.CreateArray("com.apple.developer.associated-domains");
                     var alreadyDefinedDomains = associatedDomains.values.Select(x => x.AsString()).ToList();
 
@@ -57,6 +51,14 @@ namespace TimboJimbo.InboundLinkManager.Editor.iOS
                             associatedDomains.AddString(appLink);
                         }
                     }
+                    
+                    entitlements.WriteToFile(entitlementsPath);
+                    
+                    //write the changes back to the entitlements file
+                    var entitlementFileName = Path.GetFileName(entitlementsPath);
+                    var relativeDestination = targetName + "/" + entitlementFileName;
+                    pbxProject.AddFile(relativeDestination, entitlementFileName);
+                    pbxProject.AddBuildProperty(targetGuid, "CODE_SIGN_ENTITLEMENTS", relativeDestination);
                 }
                 
                 var schemes = InboundLinkManager.CustomSchemes
