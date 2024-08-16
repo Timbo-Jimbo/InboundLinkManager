@@ -60,10 +60,8 @@ namespace TimboJimbo.InboundLinkManager.Editor.iOS
                     pbxProject.AddFile(relativeDestination, entitlementFileName);
                     pbxProject.AddBuildProperty(targetGuid, "CODE_SIGN_ENTITLEMENTS", relativeDestination);
                 }
-                
-                var schemes = InboundLinkManager.CustomSchemes
-                    .Select(x => x + "://")
-                    .ToList();
+
+                var schemes = InboundLinkManager.CustomSchemes;
 
                 if (schemes.Any())
                 {
