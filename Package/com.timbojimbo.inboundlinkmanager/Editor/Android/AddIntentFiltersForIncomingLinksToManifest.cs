@@ -8,7 +8,7 @@ namespace TimboJimbo.InboundLinkManager.Editor.Android
 {
     internal class AddIntentFiltersForIncomingLinksToManifest : IPostGenerateGradleAndroidProject
     {
-        public int callbackOrder { get; }
+        public int callbackOrder => 100000;
         
         private readonly NamedLogger _logger = new ($"{nameof(InboundLinkManager)}[Manifest Patcher]");
         
@@ -32,6 +32,8 @@ namespace TimboJimbo.InboundLinkManager.Editor.Android
                     _logger.Error("Unable to add intent filters to AndroidManifest.xml for App Links/Deep Links - No activity with the MAIN intent filter was found.");
                     return;
                 }
+
+                ClearExistingComments();
                 
                 //add the intent filters
                 var inboundLinkPrefixes = InboundLinkManager.Parsers
@@ -106,6 +108,13 @@ namespace TimboJimbo.InboundLinkManager.Editor.Android
                     return attr;
                 }
                 
+                void ClearExistingComments()
+                {
+                    var existingComments = mainActivity.ChildNodes.OfType<XmlComment>().Where(x => x.Value.Contains(nameof(InboundLinkManager))).ToArray();
+                    foreach (var comment in existingComments)
+                        mainActivity.RemoveChild(comment);
+                }
+
                 void AddIntentFilterForIncomingLinks(string sectionName, string[] schemes, (string host, string pathPrefix)[] hostPrefixCombos) 
                 {
                     var intentFilter = doc.CreateElement("intent-filter");
@@ -143,7 +152,8 @@ namespace TimboJimbo.InboundLinkManager.Editor.Android
                     }
                     
                     mainActivity.AppendChild(intentFilter);
-                    mainActivity.InsertBefore(doc.CreateComment($" {nameof(InboundLinkManager)} inject {sectionName} "), intentFilter);
+
+                    mainActivity.InsertBefore(doc.CreateComment($" {nameof(InboundLinkManager)} injected {sectionName} "), intentFilter);
                 }
             }
             

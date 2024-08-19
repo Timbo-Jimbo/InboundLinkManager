@@ -1,7 +1,7 @@
 {
   "name": "com.timbojimbo.inboundlinkmanager",
   "displayName": "Inbound Link Manager",
-  "version": "1.0.3-pre.1",
+  "version": "1.0.4-pre.1",
   "unity": "2021.3",
   "licensesUrl": "https://github.com/Timbo-Jimbo/InboundLinkManager/blob/main/LICENSE",
   "changelogUrl": "https://github.com/Timbo-Jimbo/InboundLinkManager",
