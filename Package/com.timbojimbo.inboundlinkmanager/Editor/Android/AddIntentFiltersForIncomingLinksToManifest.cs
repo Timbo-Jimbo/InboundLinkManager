@@ -33,7 +33,7 @@ namespace TimboJimbo.InboundLinkManager.Editor.Android
                     return;
                 }
 
-                ClearExistingComments();
+                DeletePreviouslyGeneratedIntentFilters();
                 
                 //add the intent filters
                 var inboundLinkPrefixes = InboundLinkManager.Parsers
@@ -107,17 +107,28 @@ namespace TimboJimbo.InboundLinkManager.Editor.Android
                     attr.Value = value;
                     return attr;
                 }
-                
-                void ClearExistingComments()
+
+                void DeletePreviouslyGeneratedIntentFilters()
                 {
-                    var existingComments = mainActivity.ChildNodes.OfType<XmlComment>().Where(x => x.Value.Contains(nameof(InboundLinkManager))).ToArray();
-                    foreach (var comment in existingComments)
-                        mainActivity.RemoveChild(comment);
+                    _logger.Log($"Clearing previously generated intent filters");
+
+                    var intentFilters = mainActivity.SelectNodes("intent-filter[@android:name='inbound-link-manager-intent-filter-root']", nsMgr);
+                    
+                    if (intentFilters != null)
+                    {
+                        foreach (XmlElement intentFilter in intentFilters)
+                        {
+                            if(intentFilter.PreviousSibling?.NodeType == XmlNodeType.Comment)
+                                mainActivity.RemoveChild(intentFilter.PreviousSibling);
+                            mainActivity.RemoveChild(intentFilter);
+                        }   
+                    }
                 }
 
                 void AddIntentFilterForIncomingLinks(string sectionName, string[] schemes, (string host, string pathPrefix)[] hostPrefixCombos) 
                 {
                     var intentFilter = doc.CreateElement("intent-filter");
+                    intentFilter.Attributes.Append(CreateAndroidAttribute("name", "inbound-link-manager-intent-filter-root"));
                     intentFilter.Attributes.Append(CreateAndroidAttribute("autoVerify", "true"));
                     
                     var action = doc.CreateElement("action");
@@ -152,8 +163,7 @@ namespace TimboJimbo.InboundLinkManager.Editor.Android
                     }
                     
                     mainActivity.AppendChild(intentFilter);
-
-                    mainActivity.InsertBefore(doc.CreateComment($" {nameof(InboundLinkManager)} injected {sectionName} "), intentFilter);
+                    mainActivity.InsertBefore(doc.CreateComment($" {nameof(InboundLinkManager)}: Injected {sectionName} "), intentFilter);
                 }
             }
             
