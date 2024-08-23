@@ -20,49 +20,8 @@ namespace TimboJimbo.InboundLinkManager.Editor.iOS
                 string projPath = PBXProject.GetPBXProjectPath(pathToBuiltProject);
                 PBXProject pbxProject = new PBXProject();
                 pbxProject.ReadFromFile(projPath);
-                
-                string targetGuid = pbxProject.GetUnityMainTargetGuid();
-
-                var appLinks = InboundLinkManager.AssociatedDomains
-                    .Select(x => $"applinks:{x}")
-                    .ToList();
-
-                if(appLinks.Any())
-                {
-                    pbxProject.AddCapability(targetGuid, PBXCapabilityType.AssociatedDomains);
-                
-                    // Ideally we would not have this hardcoded...! But PBXProject does not expose the target name...?
-                    string targetName = "Unity-iPhone"; 
-                    
-                    string entitlementsPath = $"{pathToBuiltProject}/{targetName}/{targetName}.entitlements";
-                    PlistDocument entitlements = new PlistDocument();
-                    if (File.Exists(entitlementsPath))
-                        entitlements.ReadFromFile(entitlementsPath);
-                
-                    // Add Associated Domains to entitlements
-                    PlistElementArray associatedDomains = entitlements.root.CreateArray("com.apple.developer.associated-domains");
-                    var alreadyDefinedDomains = associatedDomains.values.Select(x => x.AsString()).ToList();
-
-                    foreach (var appLink in appLinks)
-                    {
-                        if (!alreadyDefinedDomains.Contains(appLink))
-                        {
-                            _logger.Log($"Adding Associated Domain: {appLink}");
-                            associatedDomains.AddString(appLink);
-                        }
-                    }
-                    
-                    entitlements.WriteToFile(entitlementsPath);
-                    
-                    //write the changes back to the entitlements file
-                    var entitlementFileName = Path.GetFileName(entitlementsPath);
-                    var relativeDestination = targetName + "/" + entitlementFileName;
-                    pbxProject.AddFile(relativeDestination, entitlementFileName);
-                    pbxProject.AddBuildProperty(targetGuid, "CODE_SIGN_ENTITLEMENTS", relativeDestination);
-                }
 
                 var schemes = InboundLinkManager.CustomSchemes;
-
                 if (schemes.Any())
                 {
                     // Load the Info.plist file
@@ -106,6 +65,23 @@ namespace TimboJimbo.InboundLinkManager.Editor.iOS
                 }
                 
                 pbxProject.WriteToFile(projPath);
+                
+                var entitlementsFileName = pbxProject.GetBuildPropertyForAnyConfig(pbxProject.GetUnityMainTargetGuid(), "CODE_SIGN_ENTITLEMENTS");
+                if (string.IsNullOrEmpty(entitlementsFileName)) entitlementsFileName = $"{PlayerSettings.productName.Replace(" ", "_")}.entitlements";
+                
+                var capManager = new ProjectCapabilityManager(projPath, entitlementsFileName, "Unity-iPhone");
+
+                var appLinks = InboundLinkManager.AssociatedDomains
+                    .Select(x => $"applinks:{x}")
+                    .ToList();
+
+                if(appLinks.Any())
+                {
+                    capManager.AddPushNotifications(false);
+                    capManager.AddAssociatedDomains(appLinks.ToArray());
+                }
+                
+                capManager.WriteToFile();
             }
         }
     }
