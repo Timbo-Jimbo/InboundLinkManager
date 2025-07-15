@@ -143,11 +143,12 @@ namespace TimboJimbo.InboundLinkManager
                     {
                         try
                         {
-                            var result = _activeHandlers[i].HandleInboundLink(inboundLinkData);
+                            var handler = _activeHandlers[i];
+                            var result = handler.HandleInboundLink(inboundLinkData);
                             
                             if (result == Result.Handled)
                             {
-                                _logger.LogRuntimeOnly($"Inbound Link Data was handled by {_activeHandlers[i].GetType()}");
+                                _logger.LogRuntimeOnly($"Inbound Link Data was handled by {handler.GetType()}");
                                 handled = true;
                                 break;
                             }
